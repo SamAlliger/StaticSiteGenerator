@@ -1,6 +1,7 @@
 import unittest
 
 from textnode import TextNode, TextType
+from textnode_conversion import split_nodes_delimiter
 
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
@@ -58,6 +59,49 @@ class TestTextNodeConversion(unittest.TestCase):
         node = TextNode("This is a image text node", TextType.image, "https://url.com").text_node_to_html_node()
         actual = node.__repr__()
         expected = "LeafNode(img, , {'src': 'https://url.com', 'alt': 'This is a image text node'})"
+        self.assertEqual(actual, expected)
+
+class TestTextNodeSplit(unittest.TestCase):
+    def test_1split(self):
+        node = TextNode("This is text with a `code block` word", TextType.normal)
+        actual = split_nodes_delimiter([node], "`", TextType.code)
+        expected = [
+            TextNode("This is text with a ", TextType.normal),
+            TextNode("code block", TextType.code),
+            TextNode(" word", TextType.normal),
+        ]
+        self.assertEqual(actual, expected)
+    def test_2split(self):
+        node = [
+            TextNode("This is text with a `code block` word", TextType.normal),
+            TextNode("and another with a `code block` word", TextType.normal)
+        ]
+        actual = split_nodes_delimiter(node, "`", TextType.code)
+        expected = [
+            TextNode("This is text with a ", TextType.normal),
+            TextNode("code block", TextType.code),
+            TextNode(" word", TextType.normal),
+            TextNode("and another with a ", TextType.normal),
+            TextNode("code block", TextType.code),
+            TextNode(" word", TextType.normal),
+        ]
+        self.assertEqual(actual, expected)
+    def test_nosplit(self):
+        node = [
+            TextNode("This is text with a `code block` word", TextType.normal),
+            TextNode("and another with a `code block` word", TextType.normal),
+            TextNode("and a bold one that shouldn't be split", TextType.bold)
+        ]
+        actual = split_nodes_delimiter(node, "`", TextType.code)
+        expected = [
+            TextNode("This is text with a ", TextType.normal),
+            TextNode("code block", TextType.code),
+            TextNode(" word", TextType.normal),
+            TextNode("and another with a ", TextType.normal),
+            TextNode("code block", TextType.code),
+            TextNode(" word", TextType.normal),
+            TextNode("and a bold one that shouldn't be split", TextType.bold),
+        ]
         self.assertEqual(actual, expected)
 
 if __name__ == "__main__":

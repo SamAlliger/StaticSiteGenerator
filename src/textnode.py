@@ -37,3 +37,19 @@ class TextNode:
         if text_node.text_type == TextType.image:
             return LeafNode("img", "", {"src": text_node.url, "alt": text_node.text})
         raise Exception(f"{text_node.text_type} is not a valid TextType")
+
+    def split_nodes_delimiter(old_nodes, delimiter, text_type):
+        new_nodes=[]
+        for node in old_nodes:
+            if node.text_type != TextType.Normal:
+                new_nodes.append(node)
+            if len(node.split(delimiter)) % 2 != 0:
+                raise Exception("Invalid Markdown syntax")
+            else:
+                split_nodes = node.split(delimiter)
+                for i in range(0, len(split_nodes)):
+                    if i % 2 != 0:
+                        new_nodes.append(TextNode(split_nodes[i], TextType.normal))
+                    else:
+                        new_nodes.append(TextNode(split_nodes[i], text_type))
+        return new_nodes

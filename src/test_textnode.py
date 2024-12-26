@@ -1,7 +1,7 @@
 import unittest
 
 from textnode import TextNode, TextType
-from textnode_conversion import split_nodes_delimiter
+from textnode_conversion import split_nodes_delimiter, split_nodes_image, split_nodes_link
 
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
@@ -101,6 +101,92 @@ class TestTextNodeSplit(unittest.TestCase):
             TextNode("code block", TextType.code),
             TextNode(" word", TextType.normal),
             TextNode("and a bold one that shouldn't be split", TextType.bold),
+        ]
+        self.assertEqual(actual, expected)
+
+class TestTextNodeImageExtraction(unittest.TestCase):
+    def test_image1(self):
+        node = TextNode("This is text with an image of ![boots](https://www.boot.dev) and ![a thumbnail](https://www.youtube.com/@bootdotdev)", TextType.normal)
+        actual = split_nodes_image([node])
+        expected = [
+            TextNode("This is text with an image of ", TextType.normal),
+            TextNode("boots", TextType.image, "https://www.boot.dev"),
+            TextNode(" and ", TextType.normal),
+            TextNode("a thumbnail", TextType.image, "https://www.youtube.com/@bootdotdev")
+            ]
+        self.assertEqual(actual, expected)
+    def test_image2(self):
+        node = TextNode("This is text with an image of ![boots](https://www.boot.dev) and ![a thumbnail](https://www.youtube.com/@bootdotdev) and something at the end", TextType.normal)
+        actual = split_nodes_image([node])
+        expected = [
+            TextNode("This is text with an image of ", TextType.normal),
+            TextNode("boots", TextType.image, "https://www.boot.dev"),
+            TextNode(" and ", TextType.normal),
+            TextNode("a thumbnail", TextType.image, "https://www.youtube.com/@bootdotdev"),
+            TextNode(" and something at the end", TextType.normal)
+            ]
+        self.assertEqual(actual, expected)
+    def test_image3(self):
+        node = TextNode("This is text with no image", TextType.normal)
+        actual = split_nodes_image([node])
+        expected = [TextNode("This is text with no image", TextType.normal)]
+        self.assertEqual(actual, expected)
+    def test_image4(self):
+        node = [
+            TextNode("This is text with an image of ![boots](https://www.boot.dev) and ![a thumbnail](https://www.youtube.com/@bootdotdev)", TextType.normal),
+            TextNode("and another with a ![random puppy](https://www.boot.dev/lessons/bd4a35b7-e7a5-4ae3-96d7-051695ebd3da)", TextType.normal)
+        ]
+        actual = split_nodes_image(node)
+        expected = [
+            TextNode("This is text with an image of ", TextType.normal),
+            TextNode("boots", TextType.image, "https://www.boot.dev"),
+            TextNode(" and ", TextType.normal),
+            TextNode("a thumbnail", TextType.image, "https://www.youtube.com/@bootdotdev"),
+            TextNode("and another with a ", TextType.normal),
+            TextNode("random puppy", TextType.image, "https://www.boot.dev/lessons/bd4a35b7-e7a5-4ae3-96d7-051695ebd3da")
+        ]
+        self.assertEqual(actual, expected)
+
+class TestTextNodeLinkExtraction(unittest.TestCase):
+    def test_link1(self):
+        node = TextNode("This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)", TextType.normal)
+        actual = split_nodes_link([node])
+        expected = [
+            TextNode("This is text with a link ", TextType.normal),
+            TextNode("to boot dev", TextType.link, "https://www.boot.dev"),
+            TextNode(" and ", TextType.normal),
+            TextNode("to youtube", TextType.link, "https://www.youtube.com/@bootdotdev")
+            ]
+        self.assertEqual(actual, expected)
+    def test_link2(self):
+        node = TextNode("This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev) and something at the end", TextType.normal)
+        actual = split_nodes_link([node])
+        expected = [
+            TextNode("This is text with a link ", TextType.normal),
+            TextNode("to boot dev", TextType.link, "https://www.boot.dev"),
+            TextNode(" and ", TextType.normal),
+            TextNode("to youtube", TextType.link, "https://www.youtube.com/@bootdotdev"),
+            TextNode(" and something at the end", TextType.normal)
+            ]
+        self.assertEqual(actual, expected)
+    def test_link3(self):
+        node = TextNode("This is text with no link", TextType.normal)
+        actual = split_nodes_link([node])
+        expected = [TextNode("This is text with no link", TextType.normal)]
+        self.assertEqual(actual, expected)
+    def test_link4(self):
+        node = [
+            TextNode("This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)", TextType.normal),
+            TextNode("and another with a [random puppy](https://www.boot.dev/lessons/bd4a35b7-e7a5-4ae3-96d7-051695ebd3da)", TextType.normal)
+        ]
+        actual = split_nodes_link(node)
+        expected = [
+            TextNode("This is text with a link ", TextType.normal),
+            TextNode("to boot dev", TextType.link, "https://www.boot.dev"),
+            TextNode(" and ", TextType.normal),
+            TextNode("to youtube", TextType.link, "https://www.youtube.com/@bootdotdev"),
+            TextNode("and another with a ", TextType.normal),
+            TextNode("random puppy", TextType.link, "https://www.boot.dev/lessons/bd4a35b7-e7a5-4ae3-96d7-051695ebd3da")
         ]
         self.assertEqual(actual, expected)
 

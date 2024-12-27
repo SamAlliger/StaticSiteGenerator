@@ -1,7 +1,7 @@
 import unittest
 
 from textnode import TextNode, TextType
-from textnode_conversion import split_nodes_delimiter, split_nodes_image, split_nodes_link
+from textnode_conversion import split_nodes_delimiter, split_nodes_image, split_nodes_link, text_to_textnodes
 
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
@@ -187,6 +187,24 @@ class TestTextNodeLinkExtraction(unittest.TestCase):
             TextNode("to youtube", TextType.link, "https://www.youtube.com/@bootdotdev"),
             TextNode("and another with a ", TextType.normal),
             TextNode("random puppy", TextType.link, "https://www.boot.dev/lessons/bd4a35b7-e7a5-4ae3-96d7-051695ebd3da")
+        ]
+        self.assertEqual(actual, expected)
+
+class TestTextToTextNode(unittest.TestCase):
+    def test_conversion(self):
+        text = "This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+        actual = text_to_textnodes(text)
+        expected = [
+            TextNode("This is ", TextType.normal),
+            TextNode("text", TextType.bold),
+            TextNode(" with an ", TextType.normal),
+            TextNode("italic", TextType.italic),
+            TextNode(" word and a ", TextType.normal),
+            TextNode("code block", TextType.code),
+            TextNode(" and an ", TextType.normal),
+            TextNode("obi wan image", TextType.image, "https://i.imgur.com/fJRm4Vk.jpeg"),
+            TextNode(" and a ", TextType.normal),
+            TextNode("link", TextType.link, "https://boot.dev"),
         ]
         self.assertEqual(actual, expected)
 

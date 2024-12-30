@@ -1,6 +1,6 @@
 import unittest
 
-from markdown_extraction import extract_markdown_images, extract_markdown_links, markdown_to_blocks, block_to_block_type
+from markdown_extraction import extract_markdown_images, extract_markdown_links, markdown_to_blocks, block_to_block_type, extract_title
 
 class TestMarkDownExtraction(unittest.TestCase):
     def test_image(self):
@@ -106,6 +106,21 @@ class TestBlockIdentify(unittest.TestCase):
         actual = block_to_block_type(block)
         expected = "paragraph"
         self.assertEqual(actual, expected)
+
+class TestTitleExtraction(unittest.TestCase):
+    def test_extraction(self):
+        markdown = "# This is a h1 title\n\nand some other stuff"
+        actual = extract_title(markdown)
+        expected = "This is a h1 title"
+        self.assertEqual(actual, expected)
+    def test_extraction2(self):
+        markdown = "## This is not a h1 title\n\n# This is a h1 title\n\nand some other stuff\n\n# and another h1 title"
+        actual = extract_title(markdown)
+        expected = "This is a h1 title"
+        self.assertEqual(actual, expected)
+    def test_extraction3(self):
+        markdown = "## This is not a h1 title\n\nand this is just some other stuff with markdown # at an invalid position"
+        self.assertRaises(Exception, extract_title, markdown)
 
 if __name__ == "__main__":
     unittest.main()

@@ -49,3 +49,9 @@ def block_to_block_type(block):
     elif last_ordered == len(lines):
         return "ordered_list"
     return "paragraph"
+
+def extract_title(markdown):
+    try:
+        return re.findall(r"^# .*$", markdown, re.MULTILINE)[0][2:]
+    except:
+        raise Exception("No Title provided")
